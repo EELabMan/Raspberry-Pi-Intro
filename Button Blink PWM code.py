@@ -1,12 +1,13 @@
 import RPi.GPIO as GPIO 
-import time 
+import time
+import sys 
  
 #pin definitions 
 
-pwmPin = 18 
-ledPin = 23 
+pwmPin = 23 
+ledPin = 18
 butPin = 17 
-duty = 50 
+duty = 10
 
 
 ##GPIO setup ## 
@@ -17,11 +18,11 @@ GPIO.setup(ledPin, GPIO.OUT)
 GPIO.setup(pwmPin, GPIO.OUT) 
 GPIO.setup(butPin, GPIO.IN,pull_up_down=GPIO.PUD_UP) 
 
-pwm = GPIO.PWM(pwmPin, 1000) # PWM frequency = 200Hz 
+pwm = GPIO.PWM(pwmPin, 2000) # PWM frequency in Hz 
 
 GPIO.output(ledPin, GPIO.LOW) # default off 
 
-pwm.start(duty) # start at 75% 
+pwm.start(duty) # start at 10% 
 
 try: 
 
@@ -29,20 +30,19 @@ try:
 
         if GPIO.input(butPin): 
             pwm.ChangeDutyCycle(duty) 
-            GPIO.output(ledPin, GPIO.LOW) 
+            GPIO.output(ledPin, GPIO.HIGH) 
          
             #Pressed 
         else: 
-            GPIO.output(ledPin, GPIO.HIGH) 
-            pwm.ChangeDutyCycle(duty) 
-            time.sleep(1.5) 
             GPIO.output(ledPin, GPIO.LOW) 
-            pwm.ChangeDutyCycle(100) 
-            time.sleep(1.5) 
+            for dc in range(1, 101, 1): # Increase duty cycle: 0~100
+                pwm.ChangeDutyCycle(dc) # Change duty cycle
+                time.sleep(0.02)
+            for dc in range(100, 0, -1): # Decrease duty cycle: 100~0
+                pwm.ChangeDutyCycle(dc)
+                time.sleep(0.02)
             
 
 except KeyboardInterrupt: 
     pwm.stop() 
     GPIO.cleanup() 
-
-     
